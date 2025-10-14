@@ -52,5 +52,14 @@ public class Espectaculo implements Serializable {
 		this.fechafin = fechafin;
 	}
 	
+	public void verEspectaculo() {
+		System.out.println("Id: "+id);
+		System.out.println("Nombre: "+nombre);
+		System.out.println("Fecha inicio: "+fechaini);
+		System.out.println("Fecha fin "+fechafin);
+		System.out.println("Id coordinador "+idCoord);
+		//mostrar numeros
+	}
+	
 	
 }
