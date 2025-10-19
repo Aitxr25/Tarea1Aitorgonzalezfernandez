@@ -1,27 +1,49 @@
 package principal;
 
 import java.util.Scanner;
-
 import clases.Credenciales;
 import clases.Perfil;
 import clases.Sesion;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 
 public class Main {
-	
+	//cargar los properties
+	private static final String ADMIN_NOMBRE;
+	private static final String ADMIN_PASSWORD;
+
+	static {
+	    Properties props = new Properties();
+	    try (InputStream input = Files.newInputStream(Paths.get("src/main/resources/application.properties"))) {
+	        props.load(input);
+	    } catch (IOException e) {
+	        System.out.println("⚠️ No se pudo cargar application.properties: " + e.getMessage());
+	    }
+
+	    ADMIN_NOMBRE = props.getProperty("admin.nombre", "").trim();
+	    ADMIN_PASSWORD = props.getProperty("admin.password", "").trim();
+	}
+
 	
 	public static Optional<Credenciales> login(String nombre, String password, Path credencialesTxt) {
         //para mandar mensaje si es nulo alguno de los dos, por eso empleo el optional
 		Objects.requireNonNull(nombre, "El nombre de usuario no puede ser null"); 
         Objects.requireNonNull(password, "La contraseña no puede ser null");
-
+        
+        
+     // para saber si es admin o no
+        if (nombre.equals(ADMIN_NOMBRE) && password.equals(ADMIN_PASSWORD)) {
+            return Optional.of(new Credenciales(0L, ADMIN_NOMBRE, ADMIN_PASSWORD, Perfil.ADMIN));
+        }
+ 
         try (BufferedReader reader = Files.newBufferedReader(credencialesTxt, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
