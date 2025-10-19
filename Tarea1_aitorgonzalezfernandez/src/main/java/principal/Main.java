@@ -25,7 +25,7 @@ public class Main {
 	    try (InputStream input = Files.newInputStream(Paths.get("src/main/resources/application.properties"))) {
 	        props.load(input);
 	    } catch (IOException e) {
-	        System.out.println("⚠️ No se pudo cargar application.properties: " + e.getMessage());
+	        System.out.println("No se pudo cargar application.properties: " + e.getMessage());
 	    }
 
 	    ADMIN_NOMBRE = props.getProperty("admin.nombre", "").trim();
