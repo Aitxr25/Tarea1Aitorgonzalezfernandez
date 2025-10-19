@@ -2,10 +2,56 @@ package principal;
 
 import java.util.Scanner;
 
+import clases.Credenciales;
 import clases.Perfil;
 import clases.Sesion;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.Objects;
+import java.util.Optional;
 
 public class Main {
+	
+	
+	public static Optional<Credenciales> login(String nombre, String password, Path credencialesTxt) {
+        //para mandar mensaje si es nulo alguno de los dos, por eso empleo el optional
+		Objects.requireNonNull(nombre, "El nombre de usuario no puede ser null"); 
+        Objects.requireNonNull(password, "La contraseña no puede ser null");
+
+        try (BufferedReader reader = Files.newBufferedReader(credencialesTxt, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("\\|");
+                if (parts.length < 7) continue; // para comprobar si es una línea incompleta
+
+                Long id = Long.parseLong(parts[0].trim());
+                String nombreUsuario = parts[1].trim();
+                String contraseniaTxt = parts[2];
+                String perfilStr = parts[6].trim();
+
+                // Comparar
+                if (nombreUsuario.equals(nombre.trim()) && contraseniaTxt.equals(password)) {
+                    Perfil perfil = Perfil.valueOf(perfilStr); // asume que el perfil siempre es válido
+                    return Optional.of(new Credenciales(id, nombreUsuario, contraseniaTxt, perfil));
+                }
+                
+            }
+        }catch(IOException e) {
+    System.out.println("Error al leer el archivo");
+    
+
+       
+    }
+		 return Optional.empty();
+    }
+	
 	public static void main(String[]args) {
 		Sesion actual=new Sesion("invitado",Perfil.INVITADO);
 		boolean confirmarsalir = false;
