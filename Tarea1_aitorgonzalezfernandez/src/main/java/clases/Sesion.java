@@ -4,6 +4,9 @@ public class Sesion {
 
 	private String nombre;
 	private Perfil perfil;
+	
+	//para guardar la sesion activa
+	
 	public Sesion(String nombre, Perfil perfil) {
 		super();
 		this.nombre = nombre;
@@ -22,5 +25,19 @@ public class Sesion {
 		this.perfil = perfil;
 	}
 	
-	
+	// para controlar la sesion
+	private static Sesion actual;
+
+	public static void iniciarSesion(Sesion sesion) {
+	    actual = sesion;
+	}
+
+	public static Sesion getSesionActual() {
+	    return actual;
+	}
+
+	public static void cerrarSesion() {
+	    actual = null;
+	}
+
 }

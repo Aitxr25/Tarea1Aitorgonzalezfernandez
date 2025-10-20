@@ -1,5 +1,6 @@
 package clases;
 
+import java.io.Serializable;
 import java.util.Set;
 
 public class Numero {
@@ -73,5 +74,10 @@ public class Numero {
 	}
 	
 	
-	
+	@Override
+	public String toString() {
+	    return String.format("  - Número ID: %d, Orden: %d, Nombre: %s, Duración: %.2f minutos",
+	                         id, orden, nombre, duracion);
+	}
+
 }

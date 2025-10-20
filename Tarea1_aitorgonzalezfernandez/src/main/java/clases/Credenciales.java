@@ -3,7 +3,7 @@ package clases;
 public class Credenciales {
 private Long id;
 private String nombre;
-private String password;
+private String contrasenia;
 private Perfil perfil;
 
 public Credenciales() {
@@ -14,7 +14,7 @@ public Credenciales(Long id, String nombre, String password, Perfil perfil) {
 	super();
 	this.id = id;
 	this.nombre = nombre;
-	this.password = password;
+	this.contrasenia = password;
 	this.perfil = perfil;
 }
 public Long getId() {
@@ -30,10 +30,10 @@ public void setNombre(String nombre) {
 	this.nombre = nombre;
 }
 public String getPassword() {
-	return password;
+	return contrasenia;
 }
 public void setPassword(String password) {
-	this.password = password;
+	this.contrasenia = password;
 }
 public Perfil getPerfil() {
 	return perfil;

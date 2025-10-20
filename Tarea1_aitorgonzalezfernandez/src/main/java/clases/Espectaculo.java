@@ -52,6 +52,19 @@ public class Espectaculo implements Serializable {
 		this.fechafin = fechafin;
 	}
 	
+	
+	public Long getIdCoord() {
+		return idCoord;
+	}
+	public void setIdCoord(Long idCoord) {
+		this.idCoord = idCoord;
+	}
+	public Set<Numero> getNumeros() {
+		return numeros;
+	}
+	public void setNumeros(Set<Numero> numeros) {
+		this.numeros = numeros;
+	}
 	public void verEspectaculo() {
 		System.out.println("Id: "+id);
 		System.out.println("Nombre: "+nombre);

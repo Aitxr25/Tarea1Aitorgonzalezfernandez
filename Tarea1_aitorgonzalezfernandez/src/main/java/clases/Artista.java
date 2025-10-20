@@ -1,11 +1,12 @@
 package clases;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class Artista extends Persona{
+public class Artista extends Persona {
 	
 	private Long idArt;
 	private String apodo = null;
