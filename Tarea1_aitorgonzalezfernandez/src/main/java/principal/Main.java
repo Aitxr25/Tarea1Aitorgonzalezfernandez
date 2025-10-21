@@ -153,6 +153,7 @@ public class Main {
 				break;
 			case 3:
 				System.out.println("¡Hasta pronto!");
+				Sesion.cerrarSesion();
 				salir = true;
 				break;
 			default:
@@ -322,7 +323,7 @@ public class Main {
 			return;
 		}
 
-		System.out.print("Introduce el nombre de usuario: ");
+		System.out.print("Introduce el nombre de usuario (la aplicacion lo tomara como todo en minusculas): ");
 		String nombreUsuario = leer.nextLine().trim().toLowerCase();
 
 		// validar usuario (sin espacios, sin tildes/dieresis)
@@ -341,7 +342,7 @@ public class Main {
 			return;
 		}
 
-		System.out.print("Introduce el tipo de perfil (artista/coordinacion): ");
+		System.out.print("Introduce el tipo de perfil (artista/coordinador): ");
 		String perfilString = leer.nextLine().trim().toUpperCase();
 
 		if (!perfilString.equals("ARTISTA") && !perfilString.equals("COORDINADOR")) {
@@ -392,7 +393,7 @@ public class Main {
 				}
 			}
 
-			System.out.println("Selecciona las especialidades: ACROBACIA, HUMOR, MAGIA, EQUILIBRISMO, MALABARISMO");
+			System.out.println("Selecciona las especialidades (si son varias, separalas por comas): ACROBACIA, HUMOR, MAGIA, EQUILIBRISMO, MALABARISMO");
 			String especialidadesStr = leer.nextLine().trim().toUpperCase();
 			String[] especialidadesArray = especialidadesStr.split(",");
 
@@ -427,15 +428,21 @@ public class Main {
 		Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
 
 		// leer espectáculos de Espectaculos.dat
-		if (Files.exists(rutaEspectaculos)) {
-			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(rutaEspectaculos.toFile()))) {
-				listaEspectaculos.clear(); // limpiar la lista estática existente para evitar duplicidad
-				listaEspectaculos.addAll((List<Espectaculo>) ois.readObject()); // añadir los elementos cargados
-			} catch (IOException | ClassNotFoundException e) {
-				System.out.println("No se pudo leer el archivo de espectaculos: " + e.getMessage());
-				return;
-			}
-		}
+		 if (Files.exists(rutaEspectaculos)) {
+		        try {
+		        	//esto es para que lo haga si el archivo no esta vacio ya que sino da error
+		            if (Files.size(rutaEspectaculos) > 0) {
+		                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(rutaEspectaculos.toFile()))) {
+		                    listaEspectaculos.clear(); // limpiar la lista estática existente para evitar duplicidad
+		                    listaEspectaculos.addAll((List<Espectaculo>) ois.readObject()); // añadir los elementos cargados
+		                }
+		            }
+		        } catch (IOException | ClassNotFoundException e) {
+		            System.out.println("No se pudo leer el archivo de espectaculos: " + e.getMessage());
+		            return;
+		        }
+		    }
+
 
 		// id
 		long nuevoId = listaEspectaculos.stream().mapToLong(Espectaculo::getId).max().orElse(0L) + 1;
@@ -491,6 +498,7 @@ public class Main {
 		}
 
 		// mostrar los coordinadores disponibles
+		System.out.println("Coordinadores disponibles:");
 		List<Long> coordinadoresDisponibles = new ArrayList<>();
 
 		try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
@@ -551,46 +559,51 @@ public class Main {
 	}
 
 	public static void visualizarEspectaculosCompletos() {
-		Path rutaEspectaculos = Paths.get("src/main/java/archivos/espectaculos.dat");
+	    Path rutaEspectaculos = Paths.get("src/main/java/archivos/espectaculos.dat");
 
-		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(rutaEspectaculos))) {
-			System.out.println("\n--- LISTADO COMPLETO DE ESPECTÁCULOS ---");
+	    if (!Files.exists(rutaEspectaculos)) {
+	        System.out.println("No hay espectáculos registrados.");
+	        return;
+	    }
 
-			while (true) {
-				try {
-					Espectaculo e = (Espectaculo) ois.readObject();
+	    try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(rutaEspectaculos))) {
+	        List<Espectaculo> lista = (List<Espectaculo>) ois.readObject();
 
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	        if (lista.isEmpty()) {
+	            System.out.println("No hay espectáculos en la lista.");
+	            return;
+	        }
 
-					System.out.println("ID: " + e.getId());
-					System.out.println("Nombre: " + e.getNombre());
-					System.out.println("Fecha Inicio: " + e.getFechaini().format(formatter));
-					System.out.println("Fecha Fin: " + e.getFechafin().format(formatter));
-					System.out.println("ID Coordinador: " + e.getIdCoord());
+	        System.out.println("\n--- LISTADO COMPLETO DE ESPECTÁCULOS ---");
 
-					Set<Numero> numeros = e.getNumeros();
-					if (numeros == null || numeros.isEmpty()) {
-						System.out.println("Numeros: No hay numeros asignados.");
-					} else {
-						System.out.println("Numeros asignados:");
-						for (Numero n : numeros) {
-							System.out.printf("  Numero ID: %d | Orden: %d | Nombre: %s | Duracion: %.2f%n", n.getId(),
-									n.getOrden(), n.getNombre(), n.getDuracion());
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-						}
-					}
+	        for (Espectaculo e : lista) {
+	            System.out.println("ID: " + e.getId());
+	            System.out.println("Nombre: " + e.getNombre());
+	            System.out.println("Fecha Inicio: " + e.getFechaini().format(formatter));
+	            System.out.println("Fecha Fin: " + e.getFechafin().format(formatter));
+	            System.out.println("ID Coordinador: " + e.getIdCoord());
 
-					System.out.println("---------------------------------------");
+	            Set<Numero> numeros = e.getNumeros();
+	            if (numeros == null || numeros.isEmpty()) {
+	                System.out.println("Numeros: No hay numeros asignados.");
+	            } else {
+	                System.out.println("Numeros asignados:");
+	                for (Numero n : numeros) {
+	                    System.out.printf("  Numero ID: %d | Orden: %d | Nombre: %s | Duracion: %.2f%n",
+	                            n.getId(), n.getOrden(), n.getNombre(), n.getDuracion());
+	                }
+	            }
 
-				} catch (EOFException e) {
-					break;
-				}
-			}
+	            System.out.println("---------------------------------------");
+	        }
 
-		} catch (IOException | ClassNotFoundException e) {
-			System.out.println("Error al leer espectaculos: " + e.getMessage());
-		}
+	    } catch (IOException | ClassNotFoundException e) {
+	        System.out.println("Error al leer espectaculos: " + e.getMessage());
+	    }
 	}
+
 
 	public static void menuAdmin(Sesion sesion) {
 		int opcion = -1;
@@ -634,23 +647,88 @@ public class Main {
 		} while (opcion != 4);
 	}
 
+	//-------ARTISTA-------------
+	//menu artista, por el momento incompleto
+	public static void menuArtista(Sesion sesion) {
+	int opcion=-1;
+	
+	do {
+		System.out.println("\n===== MENU ARTISTA =====");
+		System.out.println("1. Ver espectaculo completo");
+		System.out.println("2. Salir");
+		System.out.print("Selecciona una opción: ");
+		try {
+			// probé a hacerlo asi para que el usuario pueda introducir primero un espacio
+			// en blanco (por ejemplo), despues el numero y aun asi se lo pille el switch
+			opcion = Integer.parseInt(leer.nextLine().trim());
+			switch (opcion) {
+			case 1:
+				visualizarEspectaculosCompletos();
+				break;
+			case 2:
+				System.out.println("Saliendo del menu de artista...");
+				sesion.setPerfil(Perfil.INVITADO);
+				System.out.println("¡Hasta pronto!");
+				break;
+			default:
+				System.out.println("La opcion no es valida. Intenta nuevamente.");
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("Debes introducir un numero válido.");
+		}
+	}while(opcion!=2);
+	
+	}
+	
+	//------COORDINADOR------
+	//menu (incompleto por ahora)
+	public static void menuCoordinador(Sesion sesion) {
+		int opcion=-1;
+		
+		do {
+			System.out.println("\n===== MENU COORDINADOR=====");
+			System.out.println("1. Ver espectaculo completo");
+			System.out.println("2. Crear espectaculo"); //cuando se avance en el codigo, pasará a ser "Gestionar espectaculo" (con mas funcionalidades)
+			System.out.println("3. Salir");
+			System.out.print("Selecciona una opción: ");
+			try {
+				// probé a hacerlo asi para que el usuario pueda introducir primero un espacio
+				// en blanco (por ejemplo), despues el numero y aun asi se lo pille el switch
+				opcion = Integer.parseInt(leer.nextLine().trim());
+				switch (opcion) {
+				case 1:
+					visualizarEspectaculosCompletos();
+					break;
+				case 2:
+					crearEspectaculos();
+					break;
+				case 3:
+					System.out.println("Saliendo del menu de coordinador...");
+					sesion.setPerfil(Perfil.INVITADO);
+					System.out.println("¡Hasta pronto!");
+					break;
+				default:
+					System.out.println("La opcion no es valida. Intenta nuevamente.");
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Debes introducir un numero válido.");
+			}
+	}while(opcion!=3);
+		
+	}
+	
+	
 	public static void main(String[] args) {
 
 		boolean confirmarSalir = false;
-		int opcion = -1;
+		
 
-		// imprimirLogo(2);
-
-		/*
-		 * do { switch(actual.getPerfil()) { case INVITADO:{
-		 * 
-		 * } } System.out.print("Bienvenido al programa de gestion del circo");
-		 * }while(confirmarsalir==false)
-		 */
 
 		Sesion.iniciarSesion(new Sesion("Invitado", Perfil.INVITADO));
 
-		do {
+		try{
+			do {
+		
 			Sesion actual = Sesion.getSesionActual();
 
 			switch (actual.getPerfil()) {
@@ -660,16 +738,21 @@ public class Main {
 			case ADMIN:
 				menuAdmin(actual);
 				break;
-				/*
-				 * case ARTISTA: menuArtista(); break; case COORDINADOR: menuCoordinacion();
-				 * break;
-				 */
+			case ARTISTA: 
+				menuArtista(actual); 
+				break; 
+			case COORDINADOR: 
+				menuCoordinador(actual);
+				break;
+				
 			default:
 				System.out.println("Perfil no reconocido. Cerrando aplicación.");
 				return;
 			}
 		} while (!confirmarSalir);
-		
+			}catch(NullPointerException e) {
+			System.out.println("Cerrando la aplicacion del circo");
+		}
 		
 		
 		
