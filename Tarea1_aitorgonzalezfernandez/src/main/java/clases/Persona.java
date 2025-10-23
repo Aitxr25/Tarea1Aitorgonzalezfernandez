@@ -5,11 +5,10 @@ public abstract class Persona {
 	protected String nombre;
 	protected String email;
 	protected String nacionalidad;
-	
+
 	protected Credenciales credenciales;
-	
-	
-	//PARA PERSONAS SIN CREEDENCIALES (INVITADOS)
+
+	// PARA PERSONAS SIN CREEDENCIALES (INVITADOS)
 	public Persona(Long id, String nombre, String email, String nacionalidad) {
 		super();
 		this.id = id;
@@ -17,11 +16,8 @@ public abstract class Persona {
 		this.email = email;
 		this.nacionalidad = nacionalidad;
 	}
-	
-	
-	
-	
-	//PARA PERSONAS YA LOGGEADAS
+
+	// PARA PERSONAS YA LOGGEADAS
 	public Persona(Long id, String nombre, String email, String nacionalidad, Credenciales credenciales) {
 		super();
 		this.id = id;
@@ -30,10 +26,6 @@ public abstract class Persona {
 		this.nacionalidad = nacionalidad;
 		this.credenciales = credenciales;
 	}
-
-
-
-
 
 	public Long getId() {
 		return id;
@@ -67,17 +59,12 @@ public abstract class Persona {
 		this.nacionalidad = nacionalidad;
 	}
 
-
-
 	public Credenciales getCredenciales() {
 		return credenciales;
 	}
 
-
-
 	public void setCredenciales(Credenciales credenciales) {
 		this.credenciales = credenciales;
 	}
-	
-	
+
 }
