@@ -20,7 +20,6 @@ import clases.Perfil;
 import clases.Sesion;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class Main {
 	}
 
 	// -------------INVITADO-------------
-	//metodo para saber si el archivo esta vacio... lo cree ahora al final de todo
+	// metodo para saber si el archivo esta vacio... lo cree ahora al final de todo
 	private static boolean estaVacio(Path path) {
 		try {
 			return Files.size(path) == 0;
@@ -74,7 +73,6 @@ public class Main {
 		}
 	}
 
-	
 	public static void mostrarEspectaculos() {
 		Path rutaEspectaculos = Paths.get("src/main/java/archivos/espectaculos.dat");
 
@@ -87,23 +85,17 @@ public class Main {
 		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(rutaEspectaculos))) {
 			System.out.println("\n--- LISTADO DE ESPECTÁCULOS ---");
 
-			
 			List<Espectaculo> lista = (List<Espectaculo>) ois.readObject();
 
 			for (Espectaculo espectaculo : lista) {
-				System.out.printf("ID: %d | Nombre: %s | Fecha Inicio: %s | Fecha Fin: %s%n",
-						espectaculo.getId(),
-						espectaculo.getNombre(),
-						espectaculo.getFechaini(),
-						espectaculo.getFechafin());
+				System.out.printf("ID: %d | Nombre: %s | Fecha Inicio: %s | Fecha Fin: %s%n", espectaculo.getId(),
+						espectaculo.getNombre(), espectaculo.getFechaini(), espectaculo.getFechafin());
 			}
 
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println("Error al leer espectáculos.dat: " + e.getMessage());
 		}
 	}
-
-
 
 	public static Optional<Credenciales> login(String nombre, String contrasenia, Path credencialesTxt) {
 		// para mandar mensaje si es nulo alguno de los dos, por eso empleo el Optional
@@ -144,74 +136,74 @@ public class Main {
 		}
 		return Optional.empty();
 	}
-	
+
 	// para iniciar sesion desde el menu de invitado
-		private static boolean iniciarLogin() {
-			Path credencialesTxt = Paths.get("src/main/java/archivos/credenciales.txt");
+	private static boolean iniciarLogin() {
+		Path credencialesTxt = Paths.get("src/main/java/archivos/credenciales.txt");
 
-			System.out.print("Usuario: "); //el .trim para eliminar los espacios en blanco al principio o al final del nombre
-			String nombre = leer.nextLine().trim();
+		System.out.print("Usuario: "); // el .trim para eliminar los espacios en blanco al principio o al final del
+		// nombre
+		String nombre = leer.nextLine().trim();
 
-			System.out.print("Contraseña: ");
-			String password = leer.nextLine();
+		System.out.print("Contraseña: ");
+		String password = leer.nextLine();
 
-			Optional<Credenciales> resultado = login(nombre, password, credencialesTxt);
+		Optional<Credenciales> resultado = login(nombre, password, credencialesTxt);
 
-			if (resultado.isPresent()) {
-				Credenciales cred = resultado.get();
-				Sesion.iniciarSesion(new Sesion(cred.getNombre(), cred.getPerfil()));
+		if (resultado.isPresent()) {
+			Credenciales cred = resultado.get();
+			Sesion.iniciarSesion(new Sesion(cred.getNombre(), cred.getPerfil()));
 
-				System.out.println("Sesión iniciada como: " + cred.getNombre());
-				System.out.println("Perfil: " + cred.getPerfil());
+			System.out.println("Sesión iniciada como: " + cred.getNombre());
+			System.out.println("Perfil: " + cred.getPerfil());
 
-				return true;
-			} else {
-				System.out.println("Credenciales incorrectas.");
-				return false;
-			}
+			return true;
+		} else {
+			System.out.println("Credenciales incorrectas.");
+			return false;
 		}
+	}
 
 	public static void menuInvitado() {
 
 		System.out.println("\nBienvenido, estas accediendo como INVITADO.");
-		int opcion=-1;
+		int opcion = -1;
 		do {
 			System.out.println("\n--- MENU INVITADO ---");
 			System.out.println("1. Ver espectaculos");
 			System.out.println("2. Iniciar sesion");
 			System.out.println("3. Salir");
 			System.out.print("Selecciona una opcion: ");
-			try{
+			try {
 				// probé a hacerlo asi para que el usuario pueda introducir primero un espacio
 				// en blanco (por ejemplo), despues el numero y aun asi se lo pille el switch
-				opcion=Integer.parseInt(leer.nextLine().trim());
-			switch (opcion) {
-			case 1:
+				opcion = Integer.parseInt(leer.nextLine().trim());
+				switch (opcion) {
+				case 1:
 
-				mostrarEspectaculos();
-				break;
-			case 2:
-				boolean exitoLogin = iniciarLogin(); // intenta login, redirige si tiene éxito
-				if (exitoLogin)
-					return; // salir del menú invitado si inicia sesión
-				break;
-			case 3:
-				System.out.println("¡Hasta pronto!");
-				Sesion.cerrarSesion();
-				break;
-			default:
-				System.out.println("La opcion no es valida. Intenta nuevamente.");
+					mostrarEspectaculos();
+					break;
+				case 2:
+					boolean exitoLogin = iniciarLogin(); // intenta login, redirige si tiene éxito
+					if (exitoLogin)
+						return; // salir del menú invitado si inicia sesión
+					break;
+				case 3:
+					System.out.println("¡Hasta pronto!");
+					Sesion.cerrarSesion();
+					break;
+				default:
+					System.out.println("La opcion no es valida. Intenta nuevamente.");
+				}
+
+			} catch (NumberFormatException e) {
+				System.out.println("Debes introducir un numero valido");
 			}
-
-			}catch (NumberFormatException e) {
-				System.out.println("Debes introducir un numero valido");			}
-		}while(opcion!=3);
+		} while (opcion != 3);
 	}
 
-	
-
 	// -------------ADMIN-------------
-	// para comprobar si existe usuario 
+	// para comprobar si existe usuario
 	public static boolean repiteUsuario(String usuarioNuevo, Path rutaCredenciales) {
 		try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
 			String linea;
@@ -226,7 +218,7 @@ public class Main {
 				String usuarioExistente = partes[1].trim();
 
 				if (usuarioExistente.equalsIgnoreCase(usuarioNuevo)) {
-					return true; 
+					return true;
 				}
 			}
 		} catch (IOException e) {
@@ -234,15 +226,15 @@ public class Main {
 		}
 		return false;
 	}
-	
-	//para verificar si el email se repite
+
+	// para verificar si el email se repite
 	private static boolean repiteEmail(String email, Path rutaCredenciales) {
 		try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
 			String linea;
 			while ((linea = reader.readLine()) != null) {
 				String[] partes = linea.split("\\|");
 				if (partes.length > 3 && partes[3].trim().equalsIgnoreCase(email.trim())) {
-					return true; 
+					return true;
 				}
 			}
 		} catch (IOException e) {
@@ -250,7 +242,6 @@ public class Main {
 		}
 		return false;
 	}
-
 
 	// archivo xml
 	// cargar los paises
@@ -310,9 +301,6 @@ public class Main {
 		return paises.get(idSeleccionado); // devolver el nombre completo
 	}
 
-
-
-	
 	// para obtener un nuevo ID para la nueva persona
 	public static long obtenerNuevoId(Path rutaCredenciales) {
 		long maxId = 0;
@@ -336,374 +324,389 @@ public class Main {
 
 	// metodo registrar persona (para el admin)
 	public static void registrarPersona() {
-	    Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
+		Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
 
-	    System.out.print("Introduce nombre real: ");
-	    String nombreReal = leer.nextLine().trim();
-	    if (!nombreReal.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
-	        System.out.println("El nombre no es valido, registro cancelado.");
-	        return;
-	    }
+		System.out.print("Introduce nombre real: ");
+		String nombreReal = leer.nextLine().trim();
+		if (!nombreReal.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
+			System.out.println("El nombre no es valido, registro cancelado.");
+			return;
+		}
 
-	    String email;
-	    while (true) {
-	        System.out.print("Introduce el email: ");
-	        email = leer.nextLine().trim();
-	        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-	            System.out.println("El email no es valido.");
-	            continue;
-	        }
-	        if (repiteEmail(email, rutaCredenciales)) {
-	            System.out.println("El email '" + email + "' ya está registrado. Introduce uno diferente.");
-	        } else {
-	            break;
-	        }
-	    }
+		String email;
+		while (true) {
+			System.out.print("Introduce el email: ");
+			email = leer.nextLine().trim();
+			if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+				System.out.println("El email no es valido.");
+				continue;
+			}
+			if (email.startsWith("|") || email.endsWith("|")) {
+				System.out.println("El email no es valido");
+				continue;
+			}
+			if (repiteEmail(email, rutaCredenciales)) {
+				System.out.println("El email '" + email + "' ya está registrado. Introduce uno diferente.");
+			} else {
+				break;
+			}
+		}
 
-	    String nacionalidad = seleccionarNacionalidad();
-	    if (nacionalidad == null) {
-	        System.out.println("La nacionalidad no es valida, registro cancelado.");
-	        return;
-	    }
+		String nacionalidad = seleccionarNacionalidad();
+		if (nacionalidad == null) {
+			System.out.println("La nacionalidad no es valida, registro cancelado.");
+			return;
+		}
 
-	    String nombreUsuario;
-	    while (true) {
-	        System.out.print("Introduce el nombre de usuario (la aplicacion lo tomara como todo en minusculas): ");
-	        nombreUsuario = leer.nextLine().trim().toLowerCase();
-	        if (nombreUsuario.contains(" ") || !nombreUsuario.matches("[a-z]+")||nombreUsuario.length()<3) {
-	            System.out.println("El nombre de usuario no es valido. Solo letras minúsculas y sin espacios y recuerda, debe tener mas de 3 caracteres.");
-	            continue;
-	        }
-	        if (repiteUsuario(nombreUsuario, rutaCredenciales)) {
-	            System.out.println("El nombre de usuario '" + nombreUsuario + "' ya está en uso. Introduce otro diferente.");
-	        } else {
-	            break;
-	        }
-	    }
-	    
-	    String contrasenia;
-	    while(true) {
-	    System.out.print("Introduce la contraseña: ");
-	    contrasenia = leer.nextLine();
-	    if (contrasenia.matches(".*\\s+.*")||contrasenia.length()<3) {
-	        System.out.println("La contraseña no es valida.");
-	        
-	    }else {
-            break;
-        }
-	    }
+		String nombreUsuario;
+		while (true) {
+			System.out.print("Introduce el nombre de usuario (la aplicacion lo tomara como todo en minusculas): ");
+			nombreUsuario = leer.nextLine().trim().toLowerCase();
+			if (nombreUsuario.contains(" ") || !nombreUsuario.matches("[a-z]+") || nombreUsuario.length() < 3) {
+				System.out.println(
+						"El nombre de usuario no es valido. Solo letras minúsculas y sin espacios y recuerda, debe tener mas de 3 caracteres.");
+				continue;
+			}
+			if (repiteUsuario(nombreUsuario, rutaCredenciales) || nombreUsuario.equals(ADMIN_NOMBRE)) {
+				System.out.println(
+						"El nombre de usuario '" + nombreUsuario + "' ya está en uso. Introduce otro diferente.");
+			} else {
+				break;
+			}
+		}
 
-	    System.out.print("Introduce el tipo de perfil (artista/coordinador): ");
-	    String perfilString = leer.nextLine().trim().toUpperCase();
-	    if (!perfilString.equals("ARTISTA") && !perfilString.equals("COORDINADOR")) {
-	        System.out.println("El perfil no es valido, registro cancelado.");
-	        return;
-	    }
+		String contrasenia;
+		while (true) {
+			System.out.print("Introduce la contraseña: ");
+			contrasenia = leer.nextLine();
+			if (contrasenia.matches(".*\\s+.*") || contrasenia.length() < 3 || contrasenia.startsWith("|")
+					|| contrasenia.endsWith("|")) {
+				System.out.println("La contraseña no es valida.");
 
-	    Perfil perfil = Perfil.valueOf(perfilString);
-	    long nuevoId = obtenerNuevoId(rutaCredenciales);
+			} else {
+				break;
+			}
+		}
 
-	    // datos exclusivos de coordinador o artista (para mostrarlos posteriormente para la confirmacion)
-	    String datosExtra = "";
+		System.out.print("Introduce el tipo de perfil (artista/coordinador): ");
+		String perfilString = leer.nextLine().trim().toUpperCase();
+		if (!perfilString.equals("ARTISTA") && !perfilString.equals("COORDINADOR")) {
+			System.out.println("El perfil no es valido, registro cancelado.");
+			return;
+		}
 
-	    if (perfil == Perfil.COORDINADOR) {
-	        String respuesta;
-	        do {
-	            System.out.print("¿Es senior? (s/n): ");
-	            respuesta = leer.nextLine().trim().toLowerCase();
-	            if (!respuesta.equals("s") && !respuesta.equals("n")) {
-	                System.out.println("Opción no válida. Introduce 's' o 'n'.");
-	            }
-	        } while (!respuesta.equals("s") && !respuesta.equals("n"));
+		Perfil perfil = Perfil.valueOf(perfilString);
+		long nuevoId = obtenerNuevoId(rutaCredenciales);
 
-	        boolean esSenior = respuesta.equals("s");
-	        LocalDate fechaSenior = null;
+		// datos exclusivos de coordinador o artista (para mostrarlos posteriormente
+		// para la confirmacion)
+		String datosExtra = "";
 
-	        if (esSenior) {
-	            System.out.print("Introduce la fecha de antigüedad (dia-mes-año): ");
-	            String fechaStr = leer.nextLine();
-	            try {
-	                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-	                fechaSenior = LocalDate.parse(fechaStr, formatter);
-	            } catch (Exception e) {
-	                System.out.println("La fecha no es valida. Registro cancelado.");
-	                return;
-	            }
-	        }
+		if (perfil == Perfil.COORDINADOR) {
+			String respuesta;
+			do {
+				System.out.print("¿Es senior? (s/n): ");
+				respuesta = leer.nextLine().trim().toLowerCase();
+				if (!respuesta.equals("s") && !respuesta.equals("n")) {
+					System.out.println("Opción no válida. Introduce 's' o 'n'.");
+				}
+			} while (!respuesta.equals("s") && !respuesta.equals("n"));
 
-	        datosExtra = "\nEs senior: " + (esSenior ? "Sí" : "No") +
-	                       (esSenior ? "\nFecha antigüedad: " + fechaSenior.toString() : "");
+			boolean esSenior = respuesta.equals("s");
+			LocalDate fechaSenior = null;
 
-	    } else if (perfil == Perfil.ARTISTA) {
-	        String tieneApodo;
-	        do {
-	            System.out.print("¿Tiene apodo? (s/n): ");
-	            tieneApodo = leer.nextLine().trim().toLowerCase();
-	            if (!tieneApodo.equals("s") && !tieneApodo.equals("n")) {
-	                System.out.println("Opción no válida. Introduce 's' o 'n'.");
-	            }
-	        } while (!tieneApodo.equals("s") && !tieneApodo.equals("n"));
+			if (esSenior) {
+				System.out.print("Introduce la fecha de antigüedad (dia-mes-año): ");
+				String fechaStr = leer.nextLine();
+				try {
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+					fechaSenior = LocalDate.parse(fechaStr, formatter);
+				} catch (Exception e) {
+					System.out.println("La fecha no es valida. Registro cancelado.");
+					return;
+				}
+			}
 
-	        String apodo = null;
-	        if (tieneApodo.equals("s")) {
-	            System.out.print("Introduce el apodo: ");
-	            apodo = leer.nextLine().trim();
-	            if (!apodo.matches("^[a-zA-Z]+( [a-zA-Z]+)*$")) {
-	                System.out.println("El apodo no es valido.");
-	                return;
-	            }
-	        }
+			datosExtra = "\nEs senior: " + (esSenior ? "Sí" : "No")
+					+ (esSenior ? "\nFecha antigüedad: " + fechaSenior.toString() : "");
 
-	        System.out.println("Selecciona las especialidades (si son varias, separalas por comas): ACROBACIA, HUMOR, MAGIA, EQUILIBRISMO, MALABARISMO");
-	        String especialidadesStr = leer.nextLine().trim().toUpperCase();
-	        String[] especialidadesArray = especialidadesStr.split(",");
+		} else if (perfil == Perfil.ARTISTA) {
+			String tieneApodo;
+			do {
+				System.out.print("¿Tiene apodo? (s/n): ");
+				tieneApodo = leer.nextLine().trim().toLowerCase();
+				if (!tieneApodo.equals("s") && !tieneApodo.equals("n")) {
+					System.out.println("Opción no válida. Introduce 's' o 'n'.");
+				}
+			} while (!tieneApodo.equals("s") && !tieneApodo.equals("n"));
 
-	        Set<Especialidad> especialidades = new HashSet<>();
-	        for (String esp : especialidadesArray) {
-	            try {
-	                if (!especialidades.add(Especialidad.valueOf(esp.trim()))) {
-	                    System.out.println("Especialidad repetida: " + esp.trim());
-	                    return;
-	                }
-	            } catch (IllegalArgumentException ex) {
-	                System.out.println("La especialidad no es valida: " + esp.trim() + ". Registro cancelado.");
-	                return;
-	            }
-	        }
+			String apodo = null;
+			if (tieneApodo.equals("s")) {
+				System.out.print("Introduce el apodo: ");
+				apodo = leer.nextLine().trim();
+				if (!apodo.matches("^[a-zA-Z]+( [a-zA-Z]+)*$")) {
+					System.out.println("El apodo no es valido.");
+					return;
+				}
+			}
 
-	        datosExtra = (apodo != null ? "\nApodo: " + apodo : "") +
-	                       "\nEspecialidades: " + especialidades.stream().map(Enum::name).collect(Collectors.joining(", "));
-	    }
+			System.out.println(
+					"Selecciona las especialidades (si son varias, separalas por comas): ACROBACIA, HUMOR, MAGIA, EQUILIBRISMO, MALABARISMO");
+			String especialidadesStr = leer.nextLine().trim().toUpperCase();
+			String[] especialidadesArray = especialidadesStr.split(",");
 
-	    // para mostrar todos los datos
-	    System.out.println("\nResumen de los datos introducidos:");
-	    System.out.println("Nombre: " + nombreReal);
-	    System.out.println("Email: " + email);
-	    System.out.println("Usuario: " + nombreUsuario);
-	    System.out.println("Nacionalidad: " + nacionalidad);
-	    System.out.println("Perfil: " + perfilString);
-	    System.out.println(datosExtra);
+			Set<Especialidad> especialidades = new HashSet<>();
+			for (String esp : especialidadesArray) {
+				try {
+					if (!especialidades.add(Especialidad.valueOf(esp.trim()))) {
+						System.out.println("Especialidad repetida: " + esp.trim());
+						return;
+					}
+				} catch (IllegalArgumentException ex) {
+					System.out.println("La especialidad no es valida: " + esp.trim() + ". Registro cancelado.");
+					return;
+				}
+			}
 
-	    String confirmacion;
-	    do {
-	        System.out.print("¿Deseas guardar esta persona? (s/n): ");
-	        confirmacion = leer.nextLine().trim().toLowerCase();
-	        if (!confirmacion.equals("s") && !confirmacion.equals("n")) {
-	            System.out.println("Opcion no válida. Introduce 's' o 'n'.");
-	        }
-	    } while (!confirmacion.equals("s") && !confirmacion.equals("n"));
+			datosExtra = (apodo != null ? "\nApodo: " + apodo : "") + "\nEspecialidades: "
+					+ especialidades.stream().map(Enum::name).collect(Collectors.joining(", "));
+		}
 
-	    if (confirmacion.equals("n")) {
-	        System.out.println("Registro cancelado por el usuario.");
-	        return;
-	    }
+		// para mostrar todos los datos
+		System.out.println("\nResumen de los datos introducidos:");
+		System.out.println("Nombre: " + nombreReal);
+		System.out.println("Email: " + email);
+		System.out.println("Usuario: " + nombreUsuario);
+		System.out.println("Nacionalidad: " + nacionalidad);
+		System.out.println("Perfil: " + perfilString);
+		System.out.println(datosExtra);
 
-	    // guardar los datos necesarios de credenciales.txt
-	    String lineaNueva = String.format("%d|%s|%s|%s|%s|%s|%s",
-	            nuevoId, nombreUsuario, contrasenia, email, nombreReal, nacionalidad, perfilString);
+		String confirmacion;
+		do {
+			System.out.print("¿Deseas guardar esta persona? (s/n): ");
+			confirmacion = leer.nextLine().trim().toLowerCase();
+			if (!confirmacion.equals("s") && !confirmacion.equals("n")) {
+				System.out.println("Opcion no válida. Introduce 's' o 'n'.");
+			}
+		} while (!confirmacion.equals("s") && !confirmacion.equals("n"));
 
-	    try (BufferedWriter writer = Files.newBufferedWriter(rutaCredenciales, StandardCharsets.UTF_8, StandardOpenOption.APPEND)) {
-	        writer.newLine();
-	        writer.write(lineaNueva);
-	        System.out.println("La persona fue registrada correctamente.");
-	    } catch (IOException e) {
-	        System.out.println("Error al guardar en archivo: " + e.getMessage());
-	    }
+		if (confirmacion.equals("n")) {
+			System.out.println("Registro cancelado por el usuario.");
+			return;
+		}
+
+		// guardar los datos necesarios de credenciales.txt
+		String lineaNueva = String.format("%d|%s|%s|%s|%s|%s|%s", nuevoId, nombreUsuario, contrasenia, email,
+				nombreReal, nacionalidad, perfilString);
+
+		try (BufferedWriter writer = Files.newBufferedWriter(rutaCredenciales, StandardCharsets.UTF_8,
+				StandardOpenOption.APPEND)) {
+			writer.newLine();
+			writer.write(lineaNueva);
+			System.out.println("La persona fue registrada correctamente.");
+		} catch (IOException e) {
+			System.out.println("Error al guardar en archivo: " + e.getMessage());
+		}
 	}
-
-
-
 
 	public static void crearEspectaculos() {
-	    Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
-	    Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
+		Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
+		Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
 
-	    // leer los espectaculos que existen, si el archivo no esta vacio
-	    if (Files.exists(rutaEspectaculos)) {
-	        try {
-	            if (Files.size(rutaEspectaculos) > 0) {
-	                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(rutaEspectaculos.toFile()))) {
-	                    listaEspectaculos.clear();
-	                    listaEspectaculos.addAll((List<Espectaculo>) ois.readObject());
-	                }
-	            }
-	        } catch (IOException | ClassNotFoundException e) {
-	            System.out.println("No se pudo leer el archivo de espectáculos: " + e.getMessage());
-	            return;
-	        }
-	    }
+		// leer los espectaculos que existen, si el archivo no esta vacio
+		if (Files.exists(rutaEspectaculos)) {
+			try {
+				if (Files.size(rutaEspectaculos) > 0) {
+					try (ObjectInputStream ois = new ObjectInputStream(
+							new FileInputStream(rutaEspectaculos.toFile()))) {
+						listaEspectaculos.clear();
+						listaEspectaculos.addAll((List<Espectaculo>) ois.readObject());
+					}
+				}
+			} catch (IOException | ClassNotFoundException e) {
+				System.out.println("No se pudo leer el archivo de espectáculos: " + e.getMessage());
+				return;
+			}
+		}
 
-	    long nuevoId = listaEspectaculos.stream().mapToLong(Espectaculo::getId).max().orElse(0L) + 1;
+		long nuevoId = listaEspectaculos.stream().mapToLong(Espectaculo::getId).max().orElse(0L) + 1;
 
-	    System.out.print("Introduce el nombre del espectáculo: ");
-	    String nombre = leer.nextLine().trim();
+		System.out.print("Introduce el nombre del espectáculo: ");
+		String nombre = leer.nextLine().trim();
 
-	    if (!nombre.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
-	        System.out.println("El nombre no es valido.");
-	        return;
-	    }
+		if (!nombre.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
+			System.out.println("El nombre no es valido.");
+			return;
+		}
 
-	    if (nombre.length() > 25) {
-	        System.out.println("El nombre no puede tener mas de 25 caracteres.");
-	        return;
-	    }
+		if (nombre.length() > 25) {
+			System.out.println("El nombre no puede tener mas de 25 caracteres.");
+			return;
+		}
 
-	    boolean nombreRepetido = listaEspectaculos.stream().anyMatch(e -> e.getNombre().equalsIgnoreCase(nombre));
-	    if (nombreRepetido) {
-	        System.out.println("Ya existe un espectaculo con ese nombre.");
-	        return;
-	    }
+		boolean nombreRepetido = listaEspectaculos.stream().anyMatch(e -> e.getNombre().equalsIgnoreCase(nombre));
+		if (nombreRepetido) {
+			System.out.println("Ya existe un espectaculo con ese nombre.");
+			return;
+		}
 
-	    LocalDate fechaIni, fechaFin;
-	    try {
-	        System.out.print("Introduce la fecha de inicio (dia-mes-año): ");
-	        fechaIni = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		LocalDate fechaIni, fechaFin;
+		try {
+			System.out.print("Introduce la fecha de inicio (dia-mes-año): ");
+			fechaIni = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-	        System.out.print("Introduce la fecha de fin (dia-mes-año): ");
-	        fechaFin = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+			System.out.print("Introduce la fecha de fin (dia-mes-año): ");
+			fechaFin = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-	        if (fechaFin.isBefore(fechaIni)) {
-	            System.out.println("La fecha de fin no puede ser anterior a la de inicio.");
-	            return;
-	        }
+			if (fechaFin.isBefore(fechaIni)) {
+				System.out.println("La fecha de fin no puede ser anterior a la de inicio.");
+				return;
+			}
 
-	        if (ChronoUnit.DAYS.between(fechaIni, fechaFin) > 365) {
-	            System.out.println("La duración no puede superar un año.");
-	            return;
-	        }
-	    } catch (Exception e) {
-	        System.out.println("Formato de fecha incorrecto.");
-	        return;
-	    }
+			if (ChronoUnit.DAYS.between(fechaIni, fechaFin) > 365) {
+				System.out.println("La duración no puede superar un año.");
+				return;
+			}
+		} catch (Exception e) {
+			System.out.println("Formato de fecha incorrecto.");
+			return;
+		}
 
-	    Long idCoord = null;
-	    Sesion sesion = Sesion.getSesionActual();
+		Long idCoord = null;
+		Sesion sesion = Sesion.getSesionActual();
 
-	    if (sesion == null) {
-	    	//este caso de momento no deberia darse ya que al inicio de programa te inicia una sesion si o si
-	    	//y no puedes crear espectaculo si no haces login como admin o coordinador
-	        System.out.println("No hay sesion activa. Operación cancelada.");
-	        return;
-	    }
+		if (sesion == null) {
+			// este caso de momento no deberia darse ya que al inicio de programa te inicia
+			// una sesion si o si
+			// y no puedes crear espectaculo si no haces login como admin o coordinador
+			System.out.println("No hay sesion activa. Operación cancelada.");
+			return;
+		}
 
-	    Perfil perfil = sesion.getPerfil();
+		Perfil perfil = sesion.getPerfil();
 
-	    if (perfil == Perfil.ADMIN) {
-	        //para que el admin escoja al coordinador por id
-	        System.out.println("Coordinadores disponibles:");
-	        List<Long> coordinadoresDisponibles = new ArrayList<>();
+		if (perfil == Perfil.ADMIN) {
+			// para que el admin escoja al coordinador por id
+			System.out.println("Coordinadores disponibles:");
+			List<Long> coordinadoresDisponibles = new ArrayList<>();
 
-	        try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
-	            String linea;
-	            while ((linea = reader.readLine()) != null) {
-	                if (linea.trim().isEmpty()) continue;
+			try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
+				String linea;
+				while ((linea = reader.readLine()) != null) {
+					if (linea.trim().isEmpty())
+						continue;
 
-	                String[] partes = linea.split("\\|");
-	                if (partes.length < 7) continue;
+					String[] partes = linea.split("\\|");
+					if (partes.length < 7)
+						continue;
 
-	                if (partes[6].trim().equalsIgnoreCase("COORDINADOR")) {
-	                    long id = Long.parseLong(partes[0].trim());
-	                    String nombreCoord = partes[4].trim();
-	                    System.out.printf("ID: %d - Nombre: %s%n", id, nombreCoord);
-	                    coordinadoresDisponibles.add(id);
-	                }
-	            }
-	        } catch (IOException e) {
-	            System.out.println("Error leyendo coordinadores: " + e.getMessage());
-	            return;
-	        }
-	        //por si no hay coordinadores
-	        if (coordinadoresDisponibles.isEmpty()) {
-	            System.out.println("No hay coordinadores disponibles.");
-	            return;
-	        }
+					if (partes[6].trim().equalsIgnoreCase("COORDINADOR")) {
+						long id = Long.parseLong(partes[0].trim());
+						String nombreCoord = partes[4].trim();
+						System.out.printf("ID: %d - Nombre: %s%n", id, nombreCoord);
+						coordinadoresDisponibles.add(id);
+					}
+				}
+			} catch (IOException e) {
+				System.out.println("Error leyendo coordinadores: " + e.getMessage());
+				return;
+			}
+			// por si no hay coordinadores
+			if (coordinadoresDisponibles.isEmpty()) {
+				System.out.println("No hay coordinadores disponibles.");
+				return;
+			}
 
-	        System.out.print("Introduce el ID del coordinador asignado: ");
-	        try {
-	            idCoord = Long.parseLong(leer.nextLine().trim());
-	            if (!coordinadoresDisponibles.contains(idCoord)) {
-	                System.out.println("ID de coordinador no válido.");
-	                return;
-	            }
-	        } catch (NumberFormatException e) {
-	            System.out.println("ID no válido.");
-	            return;
-	        }
+			System.out.print("Introduce el ID del coordinador asignado: ");
+			try {
+				idCoord = Long.parseLong(leer.nextLine().trim());
+				if (!coordinadoresDisponibles.contains(idCoord)) {
+					System.out.println("ID de coordinador no válido.");
+					return;
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("ID no válido.");
+				return;
+			}
 
-	    } else if (perfil == Perfil.COORDINADOR) {
-	        // asignar id coordinador
-	        String nombreUsuario = sesion.getNombre();
+		} else if (perfil == Perfil.COORDINADOR) {
+			// asignar id coordinador
+			String nombreUsuario = sesion.getNombre();
 
-	        try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
-	            String linea;
-	            while ((linea = reader.readLine()) != null) {
-	                if (linea.trim().isEmpty()) continue;
+			try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
+				String linea;
+				while ((linea = reader.readLine()) != null) {
+					if (linea.trim().isEmpty())
+						continue;
 
-	                String[] partes = linea.split("\\|");
-	                if (partes.length < 7) continue;
+					String[] partes = linea.split("\\|");
+					if (partes.length < 7)
+						continue;
 
-	                String usuario = partes[1].trim();
-	                String perfilStr = partes[6].trim();
+					String usuario = partes[1].trim();
+					String perfilStr = partes[6].trim();
 
-	                if (usuario.equalsIgnoreCase(nombreUsuario) && perfilStr.equalsIgnoreCase("COORDINADOR")) {
-	                    idCoord = Long.parseLong(partes[0].trim());
-	                    break;
-	                }
-	            }
-	        } catch (IOException e) {
-	            System.out.println("Error obteniendo ID del coordinador logueado: " + e.getMessage());
-	            return;
-	        }
+					if (usuario.equalsIgnoreCase(nombreUsuario) && perfilStr.equalsIgnoreCase("COORDINADOR")) {
+						idCoord = Long.parseLong(partes[0].trim());
+						break;
+					}
+				}
+			} catch (IOException e) {
+				System.out.println("Error obteniendo ID del coordinador logueado: " + e.getMessage());
+				return;
+			}
 
-	        if (idCoord == null) {
-	            System.out.println("No se pudo encontrar el ID del coordinador logueado.");
-	            return;
-	        }
+			if (idCoord == null) {
+				System.out.println("No se pudo encontrar el ID del coordinador logueado.");
+				return;
+			}
 
-	        System.out.println("Se asigno automáticamente el espectaculo al coordinador : "+idCoord+": " + nombreUsuario);
-	    } else {
-	    	//este caso en un principio no se podria dar ya que el metodo esta implementado en menuAdmin o menuCoord
-	        System.out.println("Tu perfil no permite crear espectáculos.");
-	        return;
-	    }
+			System.out.println(
+					"Se asigno automáticamente el espectaculo al coordinador : " + idCoord + ": " + nombreUsuario);
+		} else {
+			// este caso en un principio no se podria dar ya que el metodo esta implementado
+			// en menuAdmin o menuCoord
+			System.out.println("Tu perfil no permite crear espectáculos.");
+			return;
+		}
 
-	   
-	    Set<Numero> numeros = new HashSet<>();
-	    Espectaculo nuevo = new Espectaculo(nuevoId, nombre, fechaIni, fechaFin, idCoord, numeros);
+		Set<Numero> numeros = new HashSet<>();
+		Espectaculo nuevo = new Espectaculo(nuevoId, nombre, fechaIni, fechaFin, idCoord, numeros);
 
-	    // para mostrar los datos
-	    System.out.println("\n--- Datos del espectaculo ---");
-	    System.out.println("ID: " + nuevoId);
-	    System.out.println("Nombre: " + nombre);
-	    System.out.println("Fecha de inicio: " + fechaIni);
-	    System.out.println("Fecha de fin: " + fechaFin);
-	    System.out.println("ID Coordinador asignado: " + idCoord);
+		// para mostrar los datos
+		System.out.println("\n--- Datos del espectaculo ---");
+		System.out.println("ID: " + nuevoId);
+		System.out.println("Nombre: " + nombre);
+		System.out.println("Fecha de inicio: " + fechaIni);
+		System.out.println("Fecha de fin: " + fechaFin);
+		System.out.println("ID Coordinador asignado: " + idCoord);
 
-	    System.out.print("¿Deseas guardar este espectáculo? (s/n): ");
-	    String confirmacion = leer.nextLine().trim().toLowerCase();
+		System.out.print("¿Deseas guardar este espectáculo? (s/n): ");
+		String confirmacion = leer.nextLine().trim().toLowerCase();
 
-	    while (!confirmacion.equals("s") && !confirmacion.equals("n")) {
-	        System.out.print("Opción no valida. Introduce 's' o 'n': ");
-	        confirmacion = leer.nextLine().trim().toLowerCase();
-	    }
+		while (!confirmacion.equals("s") && !confirmacion.equals("n")) {
+			System.out.print("Opción no valida. Introduce 's' o 'n': ");
+			confirmacion = leer.nextLine().trim().toLowerCase();
+		}
 
-	    if (confirmacion.equals("n")) {
-	        System.out.println("Creación del espectaculo cancelada.");
-	        return;
-	    }
+		if (confirmacion.equals("n")) {
+			System.out.println("Creación del espectaculo cancelada.");
+			return;
+		}
 
-	    // guardar los espectaculos
-	    listaEspectaculos.add(nuevo);
+		// guardar los espectaculos
+		listaEspectaculos.add(nuevo);
 
-	    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(rutaEspectaculos.toFile()))) {
-	        oos.writeObject(listaEspectaculos);
-	        System.out.println("El espectaculo fue creado y guardado correctamente.");
-	    } catch (IOException e) {
-	        System.out.println("Error al guardar el espectaculo: " + e.getMessage());
-	    }
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(rutaEspectaculos.toFile()))) {
+			oos.writeObject(listaEspectaculos);
+			System.out.println("El espectaculo fue creado y guardado correctamente.");
+		} catch (IOException e) {
+			System.out.println("Error al guardar el espectaculo: " + e.getMessage());
+		}
 	}
 
-	//este no lo pide la practica (en la primera entrega. CU4) (esta mal hecho de momento)
+	// este no lo pide la practica (en la primera entrega. CU4) (esta mal hecho de
+	// momento)
 	public static void visualizarEspectaculosCompletos() {
 		Path rutaEspectaculos = Paths.get("src/main/java/archivos/espectaculos.dat");
 
@@ -896,7 +899,7 @@ public class Main {
 		} catch (NullPointerException e) {
 			System.out.println("Cerrando la aplicacion del circo");
 		}
-		
+
 	}
-	
+
 }

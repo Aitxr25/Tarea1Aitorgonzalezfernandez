@@ -1,6 +1,6 @@
 package clases;
 
-public class Persona {
+public abstract class Persona {
 	protected Long id;
 	protected String nombre;
 	protected String email;
