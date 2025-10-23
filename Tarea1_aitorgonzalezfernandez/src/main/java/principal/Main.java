@@ -510,205 +510,206 @@ public class Main {
 	}
 
 	public static void crearEspectaculos() {
-		Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
-		Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
+	    Path rutaCredenciales = Paths.get("src/main/java/archivos/credenciales.txt");
+	    Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
 
-		// leer los espectaculos que existen, si el archivo no esta vacio
-		if (Files.exists(rutaEspectaculos)) {
-			try {
-				if (Files.size(rutaEspectaculos) > 0) {
-					try (ObjectInputStream ois = new ObjectInputStream(
-							new FileInputStream(rutaEspectaculos.toFile()))) {
-						listaEspectaculos.clear();
-						listaEspectaculos.addAll((List<Espectaculo>) ois.readObject());
-					}
-				}
-			} catch (IOException | ClassNotFoundException e) {
-				System.out.println("No se pudo leer el archivo de espectáculos: " + e.getMessage());
-				return;
-			}
-		}
+	    // si no existe, crear el archivo
+	    try {
+	        if (Files.notExists(rutaEspectaculos)) {
+	            Files.createDirectories(rutaEspectaculos.getParent()); // crea la carpeta si no existe
+	            Files.createFile(rutaEspectaculos);
+	            System.out.println("Archivo Espectaculos.dat creado correctamente.");
+	        }
+	    } catch (IOException e) {
+	        System.out.println("Error creando el archivo de espectáculos: " + e.getMessage());
+	        return;
+	    }
 
-		long nuevoId = listaEspectaculos.stream().mapToLong(Espectaculo::getId).max().orElse(0L) + 1;
+	    // leer  espectáculos existentes 
+	    if (Files.exists(rutaEspectaculos)) {
+	        try {
+	            if (Files.size(rutaEspectaculos) > 0) {
+	                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(rutaEspectaculos.toFile()))) {
+	                    listaEspectaculos.clear();
+	                    listaEspectaculos.addAll((List<Espectaculo>) ois.readObject());
+	                }
+	            }
+	        } catch (IOException | ClassNotFoundException e) {
+	            System.out.println("No se pudo leer el archivo de espectáculos: " + e.getMessage());
+	            return;
+	        }
+	    }
 
-		System.out.print("Introduce el nombre del espectáculo: ");
-		String nombre = leer.nextLine().trim();
+	    long nuevoId = listaEspectaculos.stream().mapToLong(Espectaculo::getId).max().orElse(0L) + 1;
 
-		if (!nombre.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
-			System.out.println("El nombre no es valido.");
-			return;
-		}
+	    System.out.print("Introduce el nombre del espectáculo: ");
+	    String nombre = leer.nextLine().trim();
 
-		if (nombre.length() > 25) {
-			System.out.println("El nombre no puede tener mas de 25 caracteres.");
-			return;
-		}
+	    if (!nombre.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñüÜ\\s]+$")) {
+	        System.out.println("El nombre no es válido.");
+	        return;
+	    }
 
-		boolean nombreRepetido = listaEspectaculos.stream().anyMatch(e -> e.getNombre().equalsIgnoreCase(nombre));
-		if (nombreRepetido) {
-			System.out.println("Ya existe un espectaculo con ese nombre.");
-			return;
-		}
+	    if (nombre.length() > 25) {
+	        System.out.println("El nombre no puede tener más de 25 caracteres.");
+	        return;
+	    }
 
-		LocalDate fechaIni, fechaFin;
-		try {
-			System.out.print("Introduce la fecha de inicio (dia-mes-año): ");
-			fechaIni = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+	    boolean nombreRepetido = listaEspectaculos.stream().anyMatch(e -> e.getNombre().equalsIgnoreCase(nombre));
+	    if (nombreRepetido) {
+	        System.out.println("Ya existe un espectáculo con ese nombre.");
+	        return;
+	    }
 
-			System.out.print("Introduce la fecha de fin (dia-mes-año): ");
-			fechaFin = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+	    LocalDate fechaIni, fechaFin;
+	    try {
+	        System.out.print("Introduce la fecha de inicio (dia-mes-año): ");
+	        fechaIni = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-			if (fechaFin.isBefore(fechaIni)) {
-				System.out.println("La fecha de fin no puede ser anterior a la de inicio.");
-				return;
-			}
+	        System.out.print("Introduce la fecha de fin (dia-mes-año): ");
+	        fechaFin = LocalDate.parse(leer.nextLine(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-			if (ChronoUnit.DAYS.between(fechaIni, fechaFin) > 365) {
-				System.out.println("La duración no puede superar un año.");
-				return;
-			}
-		} catch (Exception e) {
-			System.out.println("Formato de fecha incorrecto.");
-			return;
-		}
+	        if (fechaFin.isBefore(fechaIni)) {
+	            System.out.println("La fecha de fin no puede ser anterior a la de inicio.");
+	            return;
+	        }
 
-		Long idCoord = null;
-		Sesion sesion = Sesion.getSesionActual();
+	        if (ChronoUnit.DAYS.between(fechaIni, fechaFin) > 365) {
+	            System.out.println("La duración no puede superar un año.");
+	            return;
+	        }
+	    } catch (Exception e) {
+	        System.out.println("Formato de fecha incorrecto.");
+	        return;
+	    }
 
-		if (sesion == null) {
-			// este caso de momento no deberia darse ya que al inicio de programa te inicia
-			// una sesion si o si
-			// y no puedes crear espectaculo si no haces login como admin o coordinador
-			System.out.println("No hay sesion activa. Operación cancelada.");
-			return;
-		}
+	    Long idCoord = null;
+	    Sesion sesion = Sesion.getSesionActual();
 
-		Perfil perfil = sesion.getPerfil();
+	    if (sesion == null) {
+	        System.out.println("No hay sesión activa. Operación cancelada.");
+	        return;
+	    }
 
-		if (perfil == Perfil.ADMIN) {
-			// para que el admin escoja al coordinador por id
-			System.out.println("Coordinadores disponibles:");
-			List<Long> coordinadoresDisponibles = new ArrayList<>();
+	    Perfil perfil = sesion.getPerfil();
 
-			try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
-				String linea;
-				while ((linea = reader.readLine()) != null) {
-					if (linea.trim().isEmpty())
-						continue;
+	    // si es admin que elija coordinador
+	    if (perfil == Perfil.ADMIN) {
+	        System.out.println("Coordinadores disponibles:");
+	        List<Long> coordinadoresDisponibles = new ArrayList<>();
 
-					String[] partes = linea.split("\\|");
-					if (partes.length < 7)
-						continue;
+	        try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
+	            String linea;
+	            while ((linea = reader.readLine()) != null) {
+	                if (linea.trim().isEmpty()) continue;
 
-					if (partes[6].trim().equalsIgnoreCase("COORDINADOR")) {
-						long id = Long.parseLong(partes[0].trim());
-						String nombreCoord = partes[4].trim();
-						System.out.printf("ID: %d - Nombre: %s%n", id, nombreCoord);
-						coordinadoresDisponibles.add(id);
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Error leyendo coordinadores: " + e.getMessage());
-				return;
-			}
-			// por si no hay coordinadores
-			if (coordinadoresDisponibles.isEmpty()) {
-				System.out.println("No hay coordinadores disponibles.");
-				return;
-			}
+	                String[] partes = linea.split("\\|");
+	                if (partes.length < 7) continue;
 
-			System.out.print("Introduce el ID del coordinador asignado: ");
-			try {
-				idCoord = Long.parseLong(leer.nextLine().trim());
-				if (!coordinadoresDisponibles.contains(idCoord)) {
-					System.out.println("ID de coordinador no válido.");
-					return;
-				}
-			} catch (NumberFormatException e) {
-				System.out.println("ID no válido.");
-				return;
-			}
+	                if (partes[6].trim().equalsIgnoreCase("COORDINADOR")) {
+	                    long id = Long.parseLong(partes[0].trim());
+	                    String nombreCoord = partes[4].trim();
+	                    System.out.printf("ID: %d - Nombre: %s%n", id, nombreCoord);
+	                    coordinadoresDisponibles.add(id);
+	                }
+	            }
+	        } catch (IOException e) {
+	            System.out.println("Error leyendo coordinadores: " + e.getMessage());
+	            return;
+	        }
 
-		} else if (perfil == Perfil.COORDINADOR) {
-			// asignar id coordinador
-			String nombreUsuario = sesion.getNombre();
+	        if (coordinadoresDisponibles.isEmpty()) {
+	            System.out.println("No hay coordinadores disponibles.");
+	            return;
+	        }
 
-			try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
-				String linea;
-				while ((linea = reader.readLine()) != null) {
-					if (linea.trim().isEmpty())
-						continue;
+	        System.out.print("Introduce el ID del coordinador asignado: ");
+	        try {
+	            idCoord = Long.parseLong(leer.nextLine().trim());
+	            if (!coordinadoresDisponibles.contains(idCoord)) {
+	                System.out.println("ID de coordinador no válido.");
+	                return;
+	            }
+	        } catch (NumberFormatException e) {
+	            System.out.println("ID no válido.");
+	            return;
+	        }
 
-					String[] partes = linea.split("\\|");
-					if (partes.length < 7)
-						continue;
+	    // asignar coordinador
+	    } else if (perfil == Perfil.COORDINADOR) {
+	        String nombreUsuario = sesion.getNombre();
 
-					String usuario = partes[1].trim();
-					String perfilStr = partes[6].trim();
+	        try (BufferedReader reader = Files.newBufferedReader(rutaCredenciales, StandardCharsets.UTF_8)) {
+	            String linea;
+	            while ((linea = reader.readLine()) != null) {
+	                if (linea.trim().isEmpty()) continue;
 
-					if (usuario.equalsIgnoreCase(nombreUsuario) && perfilStr.equalsIgnoreCase("COORDINADOR")) {
-						idCoord = Long.parseLong(partes[0].trim());
-						break;
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Error obteniendo ID del coordinador logueado: " + e.getMessage());
-				return;
-			}
+	                String[] partes = linea.split("\\|");
+	                if (partes.length < 7) continue;
 
-			if (idCoord == null) {
-				System.out.println("No se pudo encontrar el ID del coordinador logueado.");
-				return;
-			}
+	                String usuario = partes[1].trim();
+	                String perfilStr = partes[6].trim();
 
-			System.out.println(
-					"Se asigno automáticamente el espectaculo al coordinador : " + idCoord + ": " + nombreUsuario);
-		} else {
-			// este caso en un principio no se podria dar ya que el metodo esta implementado
-			// en menuAdmin o menuCoord
-			System.out.println("Tu perfil no permite crear espectáculos.");
-			return;
-		}
+	                if (usuario.equalsIgnoreCase(nombreUsuario) && perfilStr.equalsIgnoreCase("COORDINADOR")) {
+	                    idCoord = Long.parseLong(partes[0].trim());
+	                    break;
+	                }
+	            }
+	        } catch (IOException e) {
+	            System.out.println("Error obteniendo ID del coordinador logueado: " + e.getMessage());
+	            return;
+	        }
 
-		Set<Numero> numeros = new HashSet<>();
-		Espectaculo nuevo = new Espectaculo(nuevoId, nombre, fechaIni, fechaFin, idCoord, numeros);
+	        if (idCoord == null) {
+	            System.out.println("No se pudo encontrar el ID del coordinador logueado.");
+	            return;
+	        }
 
-		// para mostrar los datos
-		System.out.println("\n--- Datos del espectaculo ---");
-		System.out.println("ID: " + nuevoId);
-		System.out.println("Nombre: " + nombre);
-		System.out.println("Fecha de inicio: " + fechaIni);
-		System.out.println("Fecha de fin: " + fechaFin);
-		System.out.println("ID Coordinador asignado: " + idCoord);
+	        System.out.println("Se asignó automáticamente el espectáculo al coordinador: " + idCoord + " (" + nombreUsuario + ")");
+	    } else {
+	        System.out.println("Tu perfil no permite crear espectáculos.");
+	        return;
+	    }
 
-		System.out.print("¿Deseas guardar este espectáculo? (s/n): ");
-		String confirmacion = leer.nextLine().trim().toLowerCase();
+	    Set<Numero> numeros = new HashSet<>();
+	    Espectaculo nuevo = new Espectaculo(nuevoId, nombre, fechaIni, fechaFin, idCoord, numeros);
 
-		while (!confirmacion.equals("s") && !confirmacion.equals("n")) {
-			System.out.print("Opción no valida. Introduce 's' o 'n': ");
-			confirmacion = leer.nextLine().trim().toLowerCase();
-		}
+	    //resumen datos y confirmar guardado
+	    System.out.println("\n--- Datos del espectáculo ---");
+	    System.out.println("ID: " + nuevoId);
+	    System.out.println("Nombre: " + nombre);
+	    System.out.println("Fecha inicio: " + fechaIni);
+	    System.out.println("Fecha fin: " + fechaFin);
+	    System.out.println("ID Coordinador: " + idCoord);
 
-		if (confirmacion.equals("n")) {
-			System.out.println("Creación del espectaculo cancelada.");
-			return;
-		}
+	    System.out.print("\n¿Deseas guardar este espectáculo? (s/n): ");
+	    String confirmacion = leer.nextLine().trim().toLowerCase();
+	    while (!confirmacion.equals("s") && !confirmacion.equals("n")) {
+	        System.out.print("Opción no válida. Introduce 's' o 'n': ");
+	        confirmacion = leer.nextLine().trim().toLowerCase();
+	    }
 
-		// guardar los espectaculos
-		listaEspectaculos.add(nuevo);
+	    if (confirmacion.equals("n")) {
+	        System.out.println("Creación del espectáculo cancelada.");
+	        return;
+	    }
 
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(rutaEspectaculos.toFile()))) {
-			oos.writeObject(listaEspectaculos);
-			System.out.println("El espectaculo fue creado y guardado correctamente.");
-		} catch (IOException e) {
-			System.out.println("Error al guardar el espectaculo: " + e.getMessage());
-		}
+	    // guardar el espectáculo
+	    listaEspectaculos.add(nuevo);
+
+	    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(rutaEspectaculos.toFile()))) {
+	        oos.writeObject(listaEspectaculos);
+	        System.out.println("El espectáculo fue creado y guardado correctamente.");
+	    } catch (IOException e) {
+	        System.out.println("Error al guardar el espectáculo: " + e.getMessage());
+	    }
 	}
+
 
 	// este no lo pide la practica (en la primera entrega. CU4) (esta mal hecho de
 	// momento)
 	public static void visualizarEspectaculosCompletos() {
-		Path rutaEspectaculos = Paths.get("src/main/java/archivos/espectaculos.dat");
+		Path rutaEspectaculos = Paths.get("src/main/java/archivos/Espectaculos.dat");
 
 		if (!Files.exists(rutaEspectaculos)) {
 			System.out.println("No hay espectaculos registrados.");
